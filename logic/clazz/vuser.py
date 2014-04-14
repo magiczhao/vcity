@@ -5,7 +5,7 @@ sys.path.append("%s/../../lib/" % dir)
 import entity
 import webutils
 
-def CreateTable():
+def GetCreateTableSQL(db):
     sql = """
         create table if not exists Tbl_VUser (
             `id` char(36) not null,
@@ -18,6 +18,7 @@ def CreateTable():
             primary key (`id`)
         );
     )"""
+    return sql
 
 class VUser(entity.Entity):
     def __init__(self, accessor, uid):

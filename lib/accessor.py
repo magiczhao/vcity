@@ -26,7 +26,7 @@ class ConnectionPool:
         else:
             return redis.StrictRedis(host = config_item['host'],
                 port = int(config_item['port']))
-        
+
 class Accessor:
     def __init__(self):
         self.__db__ = ConnectionPool("MySQLdb")
