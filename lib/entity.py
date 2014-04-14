@@ -21,6 +21,9 @@ class Entity(BaseEntity):
     def IsLoaded(self):
         return self.__is_loaded__
 
+    def IsEmpty(self, string):
+        return len(string.strip()) == 0
+
     def IsExist(self):
         if not self.__is_loaded__:
             raise serrcode.VCityException("exist is unknown not loaded")

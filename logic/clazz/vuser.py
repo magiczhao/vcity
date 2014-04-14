@@ -4,6 +4,7 @@ dir = os.path.dirname(os.path.abspath(__file__))
 sys.path.append("%s/../../lib/" % dir)
 import entity
 import webutils
+import serrcode
 
 def GetCreateTableSQL():
     sql = """
@@ -27,9 +28,6 @@ class VUser(entity.Entity):
         self.__keys__= set(("id", "nickname", "register_date", "last_login",
                 "birthday", "description", "icon"))
     
-    def IsEmpty(self, string):
-        return len(string.strip()) == 0
-
     def GetSource(self):
         if self.id:
             parts = self.id.split("_")
@@ -38,8 +36,9 @@ class VUser(entity.Entity):
         return "unknown"
 
     def Validate(self):
-        if IsEmpty(self.id) or IsEmpty(self.nickname):
-            raise VCityException("usr.id or usr.nickname can't be null")
+        if self.IsEmpty(self.id) or self.IsEmpty(self.nickname):
+            raise serrcode.VCityException(
+                    "usr.id or usr.nickname can't be null")
 
 if __name__ == "__main__":
     import unittest
@@ -62,5 +61,16 @@ if __name__ == "__main__":
             self.assertEqual("qq_test", self.user.id)
             self.assertEqual("test_user", self.user.nickname)
             self.assertEqual("qq", self.user.GetSource())
+
+        def test_Validate(self):
+            self.user.nickname = ""
+            self.user.id = "qq_test"
+            try:
+                self.user.Validate()
+                self.assertTrue(False)
+            except serrcode.VCityException:
+                self.assertTrue(True)
+            self.user.nickname = "name"
+            self.user.Validate()
 
     unittest.main()
