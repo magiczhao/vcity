@@ -1,14 +1,49 @@
 import nametype
+import serrcode
 
 class BaseEntity:
     def __init__(self):
         self.__dict__['__conditions__'] = dict()
         self.__dict__['__keys__'] = set()
         self.__dict__['__fields__'] = dict()
+        self.__dict__['__accessor__'] = None
+    
+    def DebugString(self):
+        return str(self.__conditions__) + str(self.__fields__)
 
 class Entity(BaseEntity):
-    def __init__(self):
+    def __init__(self, accessor):
         BaseEntity.__init__(self)
+        self.__dict__['__is_loaded__'] = False
+        self.__dict__['__is_exist__'] = False
+        self.__accessor__ = accessor
+
+    def IsLoaded(self):
+        return self.__is_loaded__
+
+    def IsExist(self):
+        if not self.__is_loaded__:
+            raise serrcode.VCityException("exist is unknown not loaded")
+        return self.__is_exist__
+
+    def Load(self):
+        if self.__accessor__:
+            self.__is_loaded__ = True
+            try:
+                self.__accessor__.Get(self)
+                self.__is_exist__ = True
+            except VCityException:
+                self.__is_exist__ = False
+        else:
+            raise serrcode.VCityException(
+                "entity without accessor can't load or save")
+
+    def Save(self):
+        if self.__accessor__:
+            self.__accessor__.Set(self)
+        else:
+            raise serrcode.VCityException(
+                "entity without accessor can't load or save")
 
     def __getattr__(self, key):
         if key in self.__dict__:
@@ -49,7 +84,7 @@ if __name__ == "__main__":
     import unittest
     class IntEntity(Entity):
         def __init__(self):
-            Entity.__init__(self)
+            Entity.__init__(self, None)
             self.__conditions__ = {"id":"magic"}
             self.__keys__ = set(("field1", "field2"))
 
@@ -86,5 +121,17 @@ if __name__ == "__main__":
             fields = self.entity.Get()
             for f in fields:
                 self.assertEqual(fields[f], values[f])
+
+        def test_CanNotLoadSave(self):
+            try:
+                self.entity.Load()
+                self.assertTrue(False)
+            except serrcode.VCityException:
+                pass
+            try:
+                self.entity.Save()
+                self.assertTrue(False)
+            except serrcode.VCityException:
+                pass
 
     unittest.main()

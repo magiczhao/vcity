@@ -1,4 +1,5 @@
 import sconfig
+import serrcode
 import entity
 import hashlib
 import json
@@ -30,6 +31,10 @@ class Accessor:
     def __init__(self):
         self.__db__ = ConnectionPool("MySQLdb")
         self.__cache__ = ConnectionPool("redis")
+        self.is_inited = False
+    
+    def IsInited(self):
+        return is_inited
 
     # set series for mock object
     def SetDbConnectionPool(self, connection):
@@ -41,8 +46,9 @@ class Accessor:
     def Init(self):
         self.__db__.Init(sconfig.dbconfig)
         self.__cache__.Init(sconfig.cacheconfig)
+        self.is_inited = True
 
-    def get(self, entityobj):
+    def Get(self, entityobj):
         if self.GetFromCache(entityobj):
             return
         self.GetFromPermanent(entityobj)
@@ -123,6 +129,9 @@ class Accessor:
         cursor = db.cursor()
         cursor.execute(sql, params)
         desc = cursor.description
+        if not cursor.with_rows:
+            raise serrcode.VCityException("no data fetched")
+
         while True:
             record = cursor.fetchone()
             dct = dict()
@@ -196,9 +205,9 @@ class MockRedis:
     def __init__(self):
         self.mp = dict()
 
-    def hget(self, key):
+    def hget(self, bucket, key):
         if key == 'cached':
-            return {'field1':1, 'field2':2}
+            return json.dumps({'field1':1, 'field2':2})
         else:
             return None
 
@@ -209,9 +218,9 @@ class MockRedis:
 if __name__ == "__main__":
     import unittest
     class SEntity(entity.Entity):
-        def __init__(self, key):
-            entity.Entity.__init__(self)
-            self.__keys__ = set(("key", "name"))
+        def __init__(self, key, accessor):
+            entity.Entity.__init__(self, accessor)
+            self.__keys__ = set(("key", "name", "field1"))
             self.__conditions__ = {"key":key}
             self.key = key
 
@@ -225,10 +234,24 @@ if __name__ == "__main__":
             self.accessor.SetCacheConnectionPool(MockConnectionPool("redis"))
 
         def test_Save(self):
-            sentity = SEntity("magic")
+            sentity = SEntity("magic", self.accessor)
             sentity.name = "name"
             dbres, cacheres = self.accessor.Set(sentity)
             value = json.dumps(sentity.Get())
             self.assertEqual(cacheres.mp["magic"], value)
+
+        def test_GetInCache(self):
+            sentity = SEntity("cached", self.accessor)
+            sentity.Load()
+            self.assertEqual(sentity.field1, 1)
+            try:
+                value = sentity.field2
+                self.assertTrue(False)
+            except:
+                pass
+
+        def test_GetInPermanent(self):
+            sentity = SEntity("not_cached", self.accessor)
+            sentity.Load()
 
     unittest.main()

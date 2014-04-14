@@ -8,5 +8,8 @@ def Strerror(code):
         return error_map[code]
     return "unknown error!"
 
+class VCityException(Exception):
+    pass
+
 if __name__ == "__main__":
     pass

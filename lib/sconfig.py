@@ -3,9 +3,9 @@ dbconfig = (
     {
         'host' : '127.0.0.1',
         'port' : 3306,
-        'user' : 'social',
-        'passwd' : 'social',
-        'db' : 'social',
+        'user' : 'vcity',
+        'passwd' : 'vcity',
+        'db' : 'vcity',
     },
 )
 

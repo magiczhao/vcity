@@ -16,7 +16,7 @@ if __name__ == "__main__":
         def test_GetProjectRoot(self):
             rootpath = GetProjectRoot()
             dir,tail = os.path.split(rootpath)
-            self.assertEqual(tail, "social")
+            self.assertEqual(tail, "vcity")
 
         def test_GetParameter(self):
             input = {"key":"value"}

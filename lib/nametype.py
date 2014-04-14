@@ -13,7 +13,7 @@ class NameType:
         return "Direct" not in self.parts
 
     def Table(self):
-        return self.table
+        return "Tbl_%s" % self.table
 
 if __name__ == "__main__":
     import unittest
