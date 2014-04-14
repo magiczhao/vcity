@@ -1,5 +1,10 @@
 import os
 import sys
+dir = os.path.dirname(os.path.abspath(__file__))
+sys.path.append("%s/../../lib/" % dir)
+import entity
+import webutils
+import serrcode
 
 def GetCreateTableSQL():
     sql = """

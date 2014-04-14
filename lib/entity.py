@@ -7,6 +7,7 @@ class BaseEntity:
         self.__dict__['__keys__'] = set()
         self.__dict__['__fields__'] = dict()
         self.__dict__['__accessor__'] = None
+        self.__dict__['__items__'] = list()
     
     def DebugString(self):
         return str(self.__conditions__) + str(self.__fields__)
@@ -76,12 +77,14 @@ class Entity(BaseEntity):
     def GetFieldParams(self):
         return self.__fields__
 
+    def __getitem__(self, index):
+        return self.__items__[index]
     # the functions must be overwrited in subclass
     def Key(self):
         raise Exception('Key not support in Entity')
 
-    def Append(self):
-        pass
+    def Append(self, item):
+        self.__items__.append(item)
 
 if __name__ == "__main__":
     import unittest

@@ -18,12 +18,17 @@ def GetCreateTableSQL():
         primary key (`id`)
     )"""
 
+    return sql
+
 class VSubject(entity.Entity):
     def __init__(self, accessor, sid):
         entity.Entity.__init__(self, accessor)
         self.__conditions__["id"] = sid
         self.__keys__ = set(("id", "name", "category", "icon",
             "description", "resource", "favoriate"))
+
+    def Key(self):
+        return self.__conditions__['id']
 
     def Validate(self):
         try:

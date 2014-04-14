@@ -16,6 +16,7 @@ def GetCreateTableSQL():
         primary key (`id`),
         index idx_object(`object_id`, `category`)
     )"""
+    return sql
 
 class VFeed(entity.Entity):
     def __init__(self, accessor, id):
@@ -34,5 +35,27 @@ class VFeed(entity.Entity):
             raise serrcode.VCityException(
                     "id or object_id or category is empty")
 
+    def Key(self):
+        if "id" in self.__fields__:
+            return self.__fields__['id']
+        else:
+            return self.__conditions__['id']
+
 class VFeed_List(entity.Entity):
+    def __init__(self, accessor):
+        entiry.Entity.__init__(self, accessor, condition)
+        self.__conditions__["object_id"] = condition["object_id"]
+        self.__conditions__["category"] = condition["category"]
+
+    def Key(self):
+        return "%s_%s" % (self.__conditions__["object_id"],
+                self.__conditions__["category"])
+
+    def GetItem(self, index):
+        item = self.__items__[index]
+        feed = VFeed(self.__accessor__, item['id'])
+        feed.Set(item)
+        return feed
+
+if __name__ == "__main__":
     pass

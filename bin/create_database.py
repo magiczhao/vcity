@@ -25,8 +25,10 @@ def CreateTables(rpath):
         conn = ConnectDB(config)
         csr = conn.cursor()
         for m in mod_objs:
-            sql = m.GetCreateTableSQL()
-            csr.execute(sql)
+            if hasattr(m, 'GetCreateTableSQL'):
+                sql = m.GetCreateTableSQL()
+                print m.__name__, sql
+                csr.execute(sql)
         csr.close()
         conn.close()
 

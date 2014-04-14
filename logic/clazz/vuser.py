@@ -27,6 +27,9 @@ class VUser(entity.Entity):
         self.__conditions__["id"] = uid
         self.__keys__= set(("id", "nickname", "register_date", "last_login",
                 "birthday", "description", "icon"))
+
+    def Key(self):
+        return "user_%s" % self.__conditions__["id"]
     
     def GetSource(self):
         if self.id:
