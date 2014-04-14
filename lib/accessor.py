@@ -14,18 +14,21 @@ class ConnectionPool:
 
     def Init(self, config):
         self.pool = config
+    
+    def GetItemByConfig(self, config):
+        if self.item_type == "MySQLdb":
+            return MySQLdb.connect(host = config["host"],
+                    port = int(config["port"]), user = config["user"],
+                    passwd = config["passwd"], db = config["db"])
+        else:
+            return redis.StrictRedis(host = config['host'],
+                    port = int(config['port']))
 
     def GetItem(self, hash_value):
         if self.pool is None:
             raise Exception("ConnectionPool not Inited")
         config_item = self.pool[hash_value % len(self.pool)]
-        if self.item_type == "MySQLdb":
-            return MySQLdb.connect(host = config_item["host"],
-                port = int(config_item["port"]), user = config_item['user'],
-                passwd = config_item['passwd'], db = config_item['db'])
-        else:
-            return redis.StrictRedis(host = config_item['host'],
-                port = int(config_item['port']))
+        return self.GetItemByConfig(config_item)
 
 class Accessor:
     def __init__(self):

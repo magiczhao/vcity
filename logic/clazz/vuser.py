@@ -5,9 +5,9 @@ sys.path.append("%s/../../lib/" % dir)
 import entity
 import webutils
 
-def GetCreateTableSQL(db):
+def GetCreateTableSQL():
     sql = """
-        create table if not exists Tbl_VUser (
+        create table if not exists `Tbl_VUser` (
             `id` char(36) not null,
             `nickname` char(32) not null,
             `register_date` datetime not null,
@@ -17,7 +17,7 @@ def GetCreateTableSQL(db):
             `icon` char(16) default null,
             primary key (`id`)
         );
-    )"""
+    """
     return sql
 
 class VUser(entity.Entity):
@@ -26,6 +26,9 @@ class VUser(entity.Entity):
         self.__conditions__["id"] = uid
         self.__keys__= set(("id", "nickname", "register_date", "last_login",
                 "birthday", "description", "icon"))
+    
+    def IsEmpty(self, string):
+        return len(string.strip()) == 0
 
     def GetSource(self):
         if self.id:
@@ -33,6 +36,10 @@ class VUser(entity.Entity):
             if len(parts) > 0:
                 return parts[0]
         return "unknown"
+
+    def Validate(self):
+        if IsEmpty(self.id) or IsEmpty(self.nickname):
+            raise VCityException("usr.id or usr.nickname can't be null")
 
 if __name__ == "__main__":
     import unittest

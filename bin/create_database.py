@@ -8,16 +8,27 @@ if len(os.path.dirname(__file__)) > 0:
 else:
     path = os.getcwd()
 sys.path.append("%s/../logic/clazz/" % path)
+sys.path.append("%s/../lib/" % path)
 
 import MySQLdb
+import sconfig
+import accessor
 
-def CreateTable(rpath):
+def ConnectDB(config):
+    return accessor.ConnectionPool("MySQLdb").GetItemByConfig(config)
+
+def CreateTables(rpath):
     mods = glob.glob("%s/../logic/clazz/*.py" % rpath)
-    print mods, "%s/../logic/clazz/*.py" % rpath, rpath
     names = (mod.split('/')[-1].split(".")[0] for mod in mods)
     mod_objs = (importlib.import_module(name) for name in names)
-    for m in mod_objs:
-        print m.GetCreateTableSQL()
-    
+    for config in sconfig.dbconfig:
+        conn = ConnectDB(config)
+        csr = conn.cursor()
+        for m in mod_objs:
+            sql = m.GetCreateTableSQL()
+            csr.execute(sql)
+        csr.close()
+        conn.close()
+
 if __name__ == "__main__":
-    CreateTable(path)
+    CreateTables(path)
